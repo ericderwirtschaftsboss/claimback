@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { DollarSign } from 'lucide-react'
+import { DollarSign, Sun, Moon } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,7 @@ import { toast } from 'sonner'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -55,7 +57,16 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 right-4"
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      >
+        <Sun className="h-4 w-4 hidden dark:block" />
+        <Moon className="h-4 w-4 block dark:hidden" />
+      </Button>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-2">
