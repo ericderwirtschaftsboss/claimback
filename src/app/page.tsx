@@ -1,27 +1,12 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { DollarSign, Mail, Search, FileText, ArrowRight, Shield, Zap, TrendingUp } from 'lucide-react'
+import { LandingHeader } from '@/components/landing/header'
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">ClaimBack</span>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="ghost" asChild>
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/register">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       {/* Hero */}
       <section className="py-20 px-4">
