@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Search,
   FileText,
+  User,
   LogOut,
   Menu,
   X,
@@ -23,6 +24,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/opportunities', label: 'Opportunities', icon: Search },
   { href: '/claims', label: 'Claims', icon: FileText },
+  { href: '/profile', label: 'Profile', icon: User },
 ]
 
 export function NavSidebar() {
