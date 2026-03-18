@@ -11,10 +11,13 @@ import {
   Menu,
   X,
   DollarSign,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
+import { useTheme } from 'next-themes'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -25,6 +28,7 @@ const navItems = [
 export function NavSidebar() {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { theme, setTheme } = useTheme()
 
   return (
     <>
@@ -66,7 +70,16 @@ export function NavSidebar() {
             ))}
           </nav>
 
-          <div className="px-3 py-4 border-t">
+          <div className="px-3 py-4 border-t space-y-1">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-muted-foreground"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              <Sun className="h-4 w-4 hidden dark:block" />
+              <Moon className="h-4 w-4 block dark:hidden" />
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </Button>
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 text-muted-foreground"
