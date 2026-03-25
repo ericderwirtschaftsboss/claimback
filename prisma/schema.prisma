@@ -3,27 +3,24 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// NextAuth models
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([provider, providerAccountId])
 }
 
@@ -39,118 +36,66 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-
   @@unique([identifier, token])
 }
 
-// App models
 model User {
-  id              String            @id @default(cuid())
-  name            String?
-  email           String            @unique
-  emailVerified   DateTime?
-  image           String?
-  passwordHash    String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  accounts        Account[]
-  sessions        Session[]
-  emailConnections EmailConnection[]
-  opportunities   Opportunity[]
-  claims          Claim[]
-  scanLogs        ScanLog[]
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  scans         ContractScan[]
 }
 
-model EmailConnection {
-  id                String   @id @default(cuid())
-  userId            String
-  provider          String   @default("gmail")
-  email             String
-  encryptedAccessToken  String @db.Text
-  encryptedRefreshToken String @db.Text
-  tokenExpiresAt    DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, provider, email])
+model ContractScan {
+  id                    String         @id @default(cuid())
+  userId                String?
+  user                  User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title                 String?
+  contractType          String?        // EMPLOYMENT, FREELANCE, LEASE, SAAS, GYM, INSURANCE, LOAN, NDA, TOS, OTHER
+  signerRole            String?        // INDIVIDUAL, SMALL_BUSINESS, COMPANY, UNKNOWN
+  sourceType            String         // FILE, TEXT, URL
+  sourceFileName        String?
+  sourceUrl             String?
+  language              String?
+  jurisdictionDetected  String?
+  jurisdictionCode      String?
+  riskScore             Float?
+  powerImbalanceScore   Float?
+  riskLevel             String?        // LOW, MODERATE, ELEVATED, HIGH, EXTREME
+  recommendation        String?
+  executiveSummary      String?
+  executiveSummaryEn    String?
+  financialSummary      String?        // JSON
+  flags                 String?        // JSON
+  negotiationPlaybook   String?        // JSON
+  missingProtections    String?        // JSON
+  flagsEn               String?
+  negotiationPlaybookEn String?
+  missingProtectionsEn  String?
+  flagCountCritical     Int            @default(0)
+  flagCountWarning      Int            @default(0)
+  flagCountInfo         Int            @default(0)
+  analysisCompleteness  Float?
+  createdAt             DateTime       @default(now())
+  feedbacks             ScanFeedback[]
   @@index([userId])
 }
 
-model Opportunity {
-  id          String            @id @default(cuid())
-  userId      String
-  category    Category
-  vendor      String
-  description String            @db.Text
-  amount      Decimal           @db.Decimal(10, 2)
-  confidence  Int               @default(50)
-  status      OpportunityStatus @default(ACTIVE)
-  emailMsgId  String?
-  emailDate   DateTime?
-  metadata    Json?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  claims Claim[]
-
-  @@index([userId, status])
-  @@index([userId, category])
-}
-
-model Claim {
-  id              String      @id @default(cuid())
-  userId          String
-  opportunityId   String
-  status          ClaimStatus @default(DRAFT)
-  draftBody       String      @db.Text
-  finalBody       String?     @db.Text
-  resolvedAmount  Decimal?    @db.Decimal(10, 2)
-  resolvedAt      DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-
-  @@index([userId, status])
-}
-
-model ScanLog {
-  id            String   @id @default(cuid())
-  userId        String
-  emailsFetched Int      @default(0)
-  emailsAnalyzed Int     @default(0)
-  opportunitiesFound Int @default(0)
-  errors        Json?
-  startedAt     DateTime @default(now())
-  completedAt   DateTime?
-  status        String   @default("running")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-enum Category {
-  FORGOTTEN_SUBSCRIPTION
-  OVERCHARGE
-  PRICE_DROP
-  FLIGHT_COMPENSATION
-  BANK_FEE
-}
-
-enum OpportunityStatus {
-  ACTIVE
-  CLAIMED
-  DISMISSED
-}
-
-enum ClaimStatus {
-  DRAFT
-  SUBMITTED
-  RESOLVED
-  REJECTED
+model ScanFeedback {
+  id        String       @id @default(cuid())
+  scanId    String
+  scan      ContractScan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  flagId    Int
+  userId    String?
+  feedback  String       // ACCURATE or INACCURATE
+  comment   String?
+  createdAt DateTime     @default(now())
+  @@index([scanId])
 }

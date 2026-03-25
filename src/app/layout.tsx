@@ -6,15 +6,11 @@ import { Providers } from '@/components/providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ClaimBack - Recover Your Money',
-  description: 'AI-powered money recovery. Find forgotten subscriptions, overcharges, and more.',
+  title: 'SignGuard — Never sign anything without scanning it first',
+  description: 'AI-powered contract analysis. Find hidden traps, unfair clauses, and financial dangers in any contract — in seconds.',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>

@@ -3,28 +3,17 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import {
-  LayoutDashboard,
-  Search,
-  FileText,
-  User,
-  LogOut,
-  Menu,
-  X,
-  DollarSign,
-  Sun,
-  Moon,
-} from 'lucide-react'
+import { LayoutDashboard, FileSearch, Settings, LogOut, Menu, X, Shield, Sun, Moon, GitCompare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useTheme } from 'next-themes'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/opportunities', label: 'Opportunities', icon: Search },
-  { href: '/claims', label: 'Claims', icon: FileText },
-  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/dashboard', label: 'My Scans', icon: LayoutDashboard },
+  { href: '/scan', label: 'Scan a Contract', icon: FileSearch },
+  { href: '/compare', label: 'Compare Versions', icon: GitCompare },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export function NavSidebar() {
@@ -48,10 +37,10 @@ export function NavSidebar() {
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center gap-2 px-6 py-5 border-b">
-            <DollarSign className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">ClaimBack</span>
-          </div>
+          <Link href="/" className="flex items-center gap-2 px-6 py-5 border-b hover:bg-muted/50 transition-colors">
+            <Shield className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold">SignGuard</span>
+          </Link>
 
           <nav className="flex-1 px-3 py-4 space-y-1">
             {navItems.map((item) => (
@@ -73,20 +62,12 @@ export function NavSidebar() {
           </nav>
 
           <div className="px-3 py-4 border-t space-y-1">
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 text-muted-foreground"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            >
+            <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
               <Sun className="h-4 w-4 hidden dark:block" />
               <Moon className="h-4 w-4 block dark:hidden" />
               {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 text-muted-foreground"
-              onClick={() => signOut({ callbackUrl: '/login' })}
-            >
+            <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={() => signOut({ callbackUrl: '/login' })}>
               <LogOut className="h-4 w-4" />
               Sign Out
             </Button>
@@ -94,12 +75,7 @@ export function NavSidebar() {
         </div>
       </aside>
 
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      {mobileOpen && <div className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={() => setMobileOpen(false)} />}
     </>
   )
 }

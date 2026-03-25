@@ -1,18 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { DollarSign, Sun, Moon } from 'lucide-react'
+import { Shield, Sun, Moon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const errorParam = searchParams.get('error')
   const { theme, setTheme } = useTheme()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -51,12 +53,17 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-2">
-            <DollarSign className="h-10 w-10 text-primary" />
+            <Shield className="h-10 w-10 text-primary" />
           </div>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your ClaimBack account</CardDescription>
+          <CardDescription>Sign in to your SignGuard account</CardDescription>
         </CardHeader>
         <CardContent>
+          {errorParam && (
+            <div className="mb-4 p-3 rounded-md bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-sm">
+              Auth error: {errorParam}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="text-sm font-medium">
@@ -134,5 +141,13 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

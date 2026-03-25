@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { DollarSign, Sun, Moon } from 'lucide-react'
+import { Shield, Sun, Moon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -70,7 +70,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-2">
-            <DollarSign className="h-10 w-10 text-primary" />
+            <Shield className="h-10 w-10 text-primary" />
           </div>
           <CardTitle className="text-2xl">Create your account</CardTitle>
           <CardDescription>Start recovering your money today</CardDescription>
