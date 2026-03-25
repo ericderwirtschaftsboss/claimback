@@ -4,3 +4,12 @@
 
 [build.environment]
   NEXT_RUNTIME = "nodejs"
+
+# Increase function timeout for Claude API calls (default 10s is too short)
+[functions]
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    X-Custom-Timeout = "60"

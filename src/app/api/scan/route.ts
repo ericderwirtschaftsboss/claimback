@@ -204,7 +204,12 @@ export async function POST(request: Request) {
       messages.push({ role: 'user', content: `${analysisInstruction}\n\n${contractText.slice(0, 50000)}` })
     }
 
+    // Call Claude API
+    console.log('[SCAN] Calling Claude API...', { hasDocBase64: !!documentBase64, textLength: contractText?.length || 0 })
+
     let result: any
+    let lastError: any = null
+
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const response = await anthropic.messages.create({
@@ -215,6 +220,8 @@ export async function POST(request: Request) {
           messages,
         })
 
+        console.log('[SCAN] Claude responded, parsing JSON...')
+
         const responseText = response.content
           .filter(b => b.type === 'text')
           .map(b => (b as { type: 'text'; text: string }).text)
@@ -222,14 +229,35 @@ export async function POST(request: Request) {
 
         const cleaned = responseText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
         result = JSON.parse(cleaned)
+        console.log('[SCAN] Parsed successfully, flags:', result.flags?.length || 0)
         break
-      } catch (parseError: any) {
-        if (attempt === 1) {
-          console.error('Claude response parse failed twice:', parseError)
-          return NextResponse.json({ error: 'We had trouble analyzing this document. Please try again.' }, { status: 500 })
+      } catch (err: any) {
+        lastError = err
+        console.error(`[SCAN] Attempt ${attempt + 1} failed:`, err.message || err)
+
+        // Don't retry on auth/billing errors — they won't resolve
+        if (err.status === 401 || err.status === 403 || err.message?.includes('credit')) {
+          console.error('[SCAN] Auth/billing error, not retrying')
+          break
         }
-        // Retry once
+
+        if (attempt === 1) {
+          console.error('[SCAN] Both attempts failed')
+        }
       }
+    }
+
+    if (!result) {
+      const msg = lastError?.message || 'Unknown error'
+      console.error('[SCAN] Analysis failed completely:', msg)
+
+      if (lastError?.status === 401 || lastError?.status === 403) {
+        return NextResponse.json({ error: 'API authentication failed. Check your API key configuration.' }, { status: 503 })
+      }
+      if (msg.includes('credit')) {
+        return NextResponse.json({ error: 'Analysis service temporarily unavailable. Please try again later.' }, { status: 503 })
+      }
+      return NextResponse.json({ error: 'We had trouble analyzing this document. Please try again.' }, { status: 500 })
     }
 
     const flags = result.flags || []
