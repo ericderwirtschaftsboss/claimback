@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/set-db-provider.js && npx prisma generate && npx prisma migrate deploy && next build",
+    "build:local": "next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "node scripts/set-db-provider.js && npx prisma generate",
     "test": "vitest run",
     "test:watch": "vitest",
     "db:generate": "prisma generate",
