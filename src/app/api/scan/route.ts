@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { anthropic } from '@/lib/ai/client'
 
+// Allow up to 60s for Claude API analysis (Netlify/Vercel serverless timeout)
+export const maxDuration = 60
+
 function buildSystemPrompt(contractType?: string, signerRole?: string): string {
   const contextBlock = contractType && contractType !== 'OTHER'
     ? `\nThe user identified this as a ${contractType.replace(/_/g, ' ')} contract and they are signing as ${
@@ -155,8 +158,25 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json()
+    let body: any
+    try {
+      body = await request.json()
+    } catch (parseErr: any) {
+      console.error('[SCAN] Failed to parse request body:', parseErr.message)
+      return NextResponse.json({ error: 'Request too large or malformed. Try a smaller file or paste text directly.' }, { status: 400 })
+    }
+
     const { text, url, title, documentBase64, documentMediaType, fileName, sourceType: inputSourceType, contractType, signerRole } = body
+
+    console.log('[SCAN] Request received:', {
+      hasText: !!text,
+      textLen: text?.length || 0,
+      hasDoc: !!documentBase64,
+      docLen: documentBase64?.length || 0,
+      docType: documentMediaType,
+      fileName,
+      sourceType: inputSourceType,
+    })
 
     let contractText = text || ''
     let sourceType = inputSourceType || 'TEXT'

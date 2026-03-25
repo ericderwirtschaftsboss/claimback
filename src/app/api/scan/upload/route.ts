@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 
+export const maxDuration = 30
+
 const MAX_FILE_SIZE = 25 * 1024 * 1024
 
 export async function POST(request: Request) {

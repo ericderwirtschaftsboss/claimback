@@ -5,11 +5,9 @@
 [build.environment]
   NEXT_RUNTIME = "nodejs"
 
-# Increase function timeout for Claude API calls (default 10s is too short)
+# Netlify function timeout: 60 seconds (Claude API needs time for complex contracts)
+# Note: Free tier supports up to 10s, Pro supports up to 26s, Enterprise up to 60s
+# If on free tier, consider upgrading or the scan may time out
 [functions]
   node_bundler = "esbuild"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    X-Custom-Timeout = "60"
+  external_node_modules = ["mammoth", "pdfmake"]
