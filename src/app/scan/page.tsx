@@ -171,7 +171,6 @@ export default function ScanPage() {
         title: title || undefined,
         contractType: contractType || undefined,
         signerRole: signerRole || undefined,
-        consent: true,
       }
 
       if (activeTab === 'upload') {
@@ -186,6 +185,7 @@ export default function ScanPage() {
         payload.sourceType = 'URL'
       }
 
+      // Step 1: Create scan record (returns immediately)
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -197,7 +197,27 @@ export default function ScanPage() {
         setLoading(false)
         return
       }
-      router.push(`/scan/${data.id}`)
+
+      // Step 2: Poll for completion
+      const scanId = data.id
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`/api/scan/${scanId}/status`)
+          const statusData = await statusRes.json()
+
+          if (statusData.status === 'COMPLETE') {
+            clearInterval(pollInterval)
+            router.push(`/scan/${scanId}`)
+          } else if (statusData.status === 'FAILED') {
+            clearInterval(pollInterval)
+            toast.error(statusData.error || 'Analysis failed. Please try again.')
+            setLoading(false)
+          }
+          // PROCESSING — keep polling
+        } catch {
+          // Network error during poll — keep trying
+        }
+      }, 3000)
     } catch {
       toast.error('Scan failed. Please try again.')
       setLoading(false)

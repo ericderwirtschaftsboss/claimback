@@ -20,6 +20,18 @@ export default async function ScanResultPage({ params }: { params: { id: string 
   const scan = await prisma.contractScan.findUnique({ where: { id: params.id } })
   if (!scan) notFound()
 
+  // If scan is still processing, show a processing page
+  if (scan.status === 'PROCESSING') {
+    const { ProcessingPage } = await import('./processing-page')
+    return <ProcessingPage scanId={scan.id} />
+  }
+
+  // If scan failed, show error
+  if (scan.status === 'FAILED') {
+    const { FailedPage } = await import('./failed-page')
+    return <FailedPage error={scan.errorMessage || 'Analysis failed'} />
+  }
+
   const flags = scan.flags ? JSON.parse(scan.flags as string) : []
   const financialSummary = scan.financialSummary ? JSON.parse(scan.financialSummary as string) : null
   const negotiationPlaybook = scan.negotiationPlaybook ? JSON.parse(scan.negotiationPlaybook as string) : []

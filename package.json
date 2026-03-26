@@ -40,6 +40,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@netlify/functions": "^5.1.5",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/pdfmake": "^0.3.2",

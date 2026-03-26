@@ -1,13 +1,12 @@
 [build]
   command = "npm run build"
   publish = ".next"
+  functions = "netlify/functions"
 
 [build.environment]
   NEXT_RUNTIME = "nodejs"
 
-# Netlify function timeout: 60 seconds (Claude API needs time for complex contracts)
-# Note: Free tier supports up to 10s, Pro supports up to 26s, Enterprise up to 60s
-# If on free tier, consider upgrading or the scan may time out
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["mammoth", "pdfmake"]
+  external_node_modules = ["mammoth", "pdfmake", "@prisma/client"]
+  included_files = ["prisma/schema.prisma", "node_modules/.prisma/**"]

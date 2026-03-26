@@ -60,6 +60,8 @@ model ContractScan {
   title                 String?
   contractType          String?        // EMPLOYMENT, FREELANCE, LEASE, SAAS, GYM, INSURANCE, LOAN, NDA, TOS, OTHER
   signerRole            String?        // INDIVIDUAL, SMALL_BUSINESS, COMPANY, UNKNOWN
+  status                String         @default("PROCESSING") // PROCESSING, COMPLETE, FAILED
+  errorMessage          String?
   sourceType            String         // FILE, TEXT, URL
   sourceFileName        String?
   sourceUrl             String?
