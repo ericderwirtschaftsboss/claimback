@@ -18,6 +18,8 @@ RULES:
 - Confidence: HIGH (clear risk), MEDIUM (interpretation-dependent), LOW (ambiguous).
 - Verify section numbers exist. Say "within the agreement" if unsure.
 ${ctx}
+RISK SCORE CALIBRATION: Score must reflect how this contract compares to STANDARD terms for its type. A self-serve SaaS with no-refund, AS-IS, and 12-month liability caps is industry standard — score 4-6, not 8-9. Reserve HIGH (8+) for genuinely unusual/aggressive terms: uncapped penalties, predatory auto-renewal, one-sided indemnification far beyond norms, jurisdiction shopping. The score answers "how much worse than typical?" not "how many unfavorable clauses exist?"
+
 CHECK ALL: auto-renewal, price escalation, hidden fees, uncapped charges, late payment penalties, tax gross-up, termination penalties, payment during suspension, volume clawbacks | data licensing beyond service, derived/aggregated data ownership, cross-border transfers, subprocessor changes, feedback licenses, custom work ownership, marketing rights, no data deletion timeline | long notice periods (>30d=aggressive), cancellation restrictions, liquidated damages, no termination for convenience, asymmetric termination, post-termination restrictions | one-sided indemnification, low liability caps, warranty disclaimers, beta exclusions, mandatory arbitration, class action waiver, non-disparagement, pricing confidentiality | unilateral term changes, unilateral assignment, audit at signer cost, survival clauses | definitional traps (redefining terms to limit signer rights), AS-IS disclaimers, fitness disclaimers | separate data breach caps, cap carve-outs favoring provider, "preceding 12 months" caps | external document references, "as updated from time to time" clauses.
 
 Return ONLY valid JSON:

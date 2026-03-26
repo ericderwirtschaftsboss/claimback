@@ -20,16 +20,31 @@ export default async function ScanResultPage({ params }: { params: { id: string 
   const scan = await prisma.contractScan.findUnique({ where: { id: params.id } })
   if (!scan) notFound()
 
+  // Helper to wrap content with sidebar for logged-in users
+  function withLayout(child: React.ReactNode) {
+    if (isLoggedIn) {
+      return (
+        <div className="min-h-screen">
+          <NavSidebar />
+          <main className="md:ml-64 min-h-screen">
+            <div className="p-4 sm:p-6 md:p-8 max-w-5xl mx-auto">{child}</div>
+          </main>
+        </div>
+      )
+    }
+    return child
+  }
+
   // If scan is still processing, show a processing page
   if (scan.status === 'PROCESSING') {
     const { ProcessingPage } = await import('./processing-page')
-    return <ProcessingPage scanId={scan.id} />
+    return withLayout(<ProcessingPage scanId={scan.id} />)
   }
 
   // If scan failed, show error
   if (scan.status === 'FAILED') {
     const { FailedPage } = await import('./failed-page')
-    return <FailedPage error={scan.errorMessage || 'Analysis failed'} />
+    return withLayout(<FailedPage error={scan.errorMessage || 'Analysis failed'} />)
   }
 
   const flags = scan.flags ? JSON.parse(scan.flags as string) : []

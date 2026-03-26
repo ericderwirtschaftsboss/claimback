@@ -814,6 +814,13 @@ export function ScanResultClient({
             </div>
           </div>
 
+          {/* Showing count */}
+          {(activeFilter !== 'ALL' || highConfidenceOnly) && (
+            <p className="text-sm text-muted-foreground">
+              Showing {filtered.length} of {regularFlags.length} flags
+            </p>
+          )}
+
           {/* Flag cards */}
           <div className="space-y-3">
             {filtered.map((flag) => {
