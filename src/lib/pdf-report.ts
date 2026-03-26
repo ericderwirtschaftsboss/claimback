@@ -59,12 +59,12 @@ interface ScanData {
 }
 
 const COLORS = {
-  primary: '#4F46E5',
+  primary: '#0EA5E9',
   critical: '#DC2626',
   warning: '#D97706',
   info: '#2563EB',
   green: '#16A34A',
-  purple: '#7C3AED',
+  purple: '#0284C7',
   gray: '#6B7280',
   lightGray: '#F3F4F6',
 }

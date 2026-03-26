@@ -591,7 +591,7 @@ export function ScanResultClient({
           {scan.jurisdictionDetected && (
             <Badge
               variant="outline"
-              className="text-xs border-violet-300 text-violet-700 dark:border-violet-700 dark:text-violet-400 shrink-0"
+              className="text-xs border-sky-300 text-sky-700 dark:border-sky-700 dark:text-sky-400 shrink-0"
             >
               <Scale className="mr-1 h-3 w-3" />
               {scan.jurisdictionDetected}
@@ -924,12 +924,12 @@ export function ScanResultClient({
                       )}
 
                       {flag.jurisdiction_note && (
-                        <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 p-3">
-                          <p className="font-semibold text-violet-600 dark:text-violet-400 mb-1 flex items-center gap-1.5">
+                        <div className="rounded-lg border border-sky-500/30 bg-sky-500/5 p-3">
+                          <p className="font-semibold text-sky-600 dark:text-sky-400 mb-1 flex items-center gap-1.5">
                             <Scale className="h-3.5 w-3.5" />
                             Jurisdiction Note
                           </p>
-                          <p className="text-violet-700 dark:text-violet-300 text-sm">
+                          <p className="text-sky-700 dark:text-sky-300 text-sm">
                             {flag.jurisdiction_note}
                           </p>
                         </div>

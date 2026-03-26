@@ -45,9 +45,12 @@ model User {
   email         String         @unique
   emailVerified DateTime?
   image         String?
-  passwordHash  String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  passwordHash         String?
+  scanCredits          Int            @default(2)
+  freeScansUsedThisMonth Int         @default(0)
+  freeScansResetAt     DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
   accounts      Account[]
   sessions      Session[]
   scans         ContractScan[]
