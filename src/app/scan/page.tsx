@@ -16,7 +16,6 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import { extractTextFromFile } from '@/lib/extract-text'
 
-const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.svg', '.heic']
 
 const CONTRACT_TYPES = [
   { label: 'Employment', value: 'EMPLOYMENT', icon: Briefcase },
@@ -54,9 +53,9 @@ export default function ScanPage() {
   const isLoggedIn = !!session
 
   // Form state
-  const [activeTab, setActiveTab] = useState<'upload' | 'text' | 'url'>('upload')
+  const [activeTab, setActiveTab] = useState<'upload' | 'text'>('upload')
   const [text, setText] = useState('')
-  const [url, setUrl] = useState('')
+  // URL tab removed — PDF upload and paste text only
   const [title, setTitle] = useState('')
   const [contractType, setContractType] = useState('')
   const [signerRole, setSignerRole] = useState('')
@@ -100,14 +99,11 @@ export default function ScanPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function isImageFile(file: File): boolean {
-    const name = file.name.toLowerCase()
-    return IMAGE_EXTENSIONS.some(ext => name.endsWith(ext)) || file.type.startsWith('image/')
-  }
 
   async function processFile(file: File) {
-    if (isImageFile(file)) {
-      toast.error('For accurate analysis, please upload a PDF or Word document.')
+    const ext = file.name.split('.').pop()?.toLowerCase()
+    if (ext !== 'pdf' && file.type !== 'application/pdf') {
+      toast.error('Only PDF files are accepted. For best results, convert your document to PDF first.')
       return
     }
     if (file.size > 25 * 1024 * 1024) {
@@ -148,7 +144,7 @@ export default function ScanPage() {
   function hasContent(): boolean {
     if (activeTab === 'upload') return !!extractedText
     if (activeTab === 'text') return !!text.trim()
-    if (activeTab === 'url') return !!url.trim()
+    // URL tab removed
     return false
   }
 
@@ -177,12 +173,9 @@ export default function ScanPage() {
         payload.text = extractedText
         payload.fileName = uploadedFile?.name
         payload.sourceType = 'FILE'
-      } else if (activeTab === 'text') {
+      } else {
         payload.text = text
         payload.sourceType = 'TEXT'
-      } else {
-        payload.url = url
-        payload.sourceType = 'URL'
       }
 
       // Step 1: Create scan record (returns immediately)
@@ -267,7 +260,7 @@ export default function ScanPage() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex gap-2">
-              {(['upload', 'text', 'url'] as const).map(tab => (
+              {(['upload', 'text'] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -277,7 +270,7 @@ export default function ScanPage() {
                       : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   }`}
                 >
-                  {tab === 'upload' ? 'Upload File' : tab === 'text' ? 'Paste Text' : 'Enter URL'}
+                  {tab === 'upload' ? 'Upload PDF' : 'Paste Text'}
                 </button>
               ))}
             </div>
@@ -299,29 +292,21 @@ export default function ScanPage() {
                   }`}
                 >
                   <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                  <p className="font-medium">Drop a contract here, or click to upload</p>
+                  <p className="font-medium">Drop a PDF here, or click to upload</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Upload a PDF, Word document, or text file — up to 25MB
+                    PDF files only — up to 25MB
                   </p>
-                  <div className="flex justify-center gap-6 mt-4">
+                  <div className="flex justify-center mt-4">
                     <div className="flex flex-col items-center gap-1">
                       <FileText className="h-8 w-8 text-red-400" />
                       <span className="text-xs text-muted-foreground">PDF</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <File className="h-8 w-8 text-blue-400" />
-                      <span className="text-xs text-muted-foreground">DOCX</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <FileText className="h-8 w-8 text-gray-400" />
-                      <span className="text-xs text-muted-foreground">TXT</span>
                     </div>
                   </div>
                   <input
                     ref={fileInputRef}
                     type="file"
                     className="hidden"
-                    accept=".pdf,.docx,.txt"
+                    accept=".pdf"
                     onChange={e => {
                       const f = e.target.files?.[0]
                       if (f) processFile(f)
@@ -356,15 +341,7 @@ export default function ScanPage() {
               />
             )}
 
-            {/* URL tab */}
-            {activeTab === 'url' && (
-              <Input
-                type="url"
-                placeholder="https://example.com/terms-of-service"
-                value={url}
-                onChange={e => setUrl(e.target.value)}
-              />
-            )}
+            {/* URL tab removed — PDF upload and paste text only */}
 
             {/* Title input */}
             <Input
