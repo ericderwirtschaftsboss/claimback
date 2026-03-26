@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useTranslation } from '@/lib/translations'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -17,39 +18,40 @@ import { extractTextFromFile } from '@/lib/extract-text'
 
 
 const CONTRACT_TYPES = [
-  { label: 'Employment', value: 'EMPLOYMENT', icon: Briefcase },
-  { label: 'Freelance', value: 'FREELANCE', icon: Handshake },
-  { label: 'Lease/Rental', value: 'LEASE', icon: Home },
-  { label: 'SaaS/Software', value: 'SAAS', icon: Code },
-  { label: 'Gym/Membership', value: 'GYM', icon: Dumbbell },
-  { label: 'Insurance', value: 'INSURANCE', icon: FileSearch },
-  { label: 'Loan/Credit', value: 'LOAN', icon: CreditCard },
-  { label: 'NDA', value: 'NDA', icon: Lock },
-  { label: 'Terms of Service', value: 'TOS', icon: ScrollText },
-  { label: 'Other/Not Sure', value: 'OTHER', icon: FileText },
+  { tKey: 'scan.employment', value: 'EMPLOYMENT', icon: Briefcase },
+  { tKey: 'scan.freelance', value: 'FREELANCE', icon: Handshake },
+  { tKey: 'scan.lease', value: 'LEASE', icon: Home },
+  { tKey: 'scan.saas', value: 'SAAS', icon: Code },
+  { tKey: 'scan.gym', value: 'GYM', icon: Dumbbell },
+  { tKey: 'scan.insurance', value: 'INSURANCE', icon: FileSearch },
+  { tKey: 'scan.loan', value: 'LOAN', icon: CreditCard },
+  { tKey: 'scan.nda', value: 'NDA', icon: Lock },
+  { tKey: 'scan.tos', value: 'TOS', icon: ScrollText },
+  { tKey: 'scan.other', value: 'OTHER', icon: FileText },
 ] as const
 
 const SIGNER_ROLES = [
-  { label: "I'm an individual signing", value: 'INDIVIDUAL' },
-  { label: 'Signing for my small business', value: 'SMALL_BUSINESS' },
-  { label: 'Signing for a company', value: 'COMPANY' },
-  { label: 'Not sure', value: 'UNKNOWN' },
+  { tKey: 'scan.signerIndividual', value: 'INDIVIDUAL' },
+  { tKey: 'scan.signerSmallBusiness', value: 'SMALL_BUSINESS' },
+  { tKey: 'scan.signerCompany', value: 'COMPANY' },
+  { tKey: 'scan.signerUnknown', value: 'UNKNOWN' },
 ] as const
-
-const LOADING_MESSAGES = [
-  'Reading your document...',
-  'Analyzing clauses...',
-  'Checking for hidden traps...',
-  'Evaluating financial terms...',
-  'Assessing exit conditions...',
-  'Building negotiation playbook...',
-  'Generating report...',
-]
 
 export default function ScanPage() {
   const router = useRouter()
   const { data: session } = useSession()
+  const { t } = useTranslation()
   const isLoggedIn = !!session
+
+  const loadingMessages = [
+    t('scan.step1'),
+    t('scan.step2'),
+    t('scan.step3'),
+    t('scan.step4'),
+    t('scan.step5'),
+    t('scan.step6'),
+    t('scan.step7'),
+  ]
 
   // Form state — PDF upload only
   const [title, setTitle] = useState('')
@@ -71,13 +73,14 @@ export default function ScanPage() {
 
   useEffect(() => {
     if (!loading) return
-    setLoadingMessage(LOADING_MESSAGES[0])
+    setLoadingMessage(loadingMessages[0])
     let i = 0
     const interval = setInterval(() => {
-      i = (i + 1) % LOADING_MESSAGES.length
-      setLoadingMessage(LOADING_MESSAGES[i])
+      i = (i + 1) % loadingMessages.length
+      setLoadingMessage(loadingMessages[i])
     }, 3000)
     return () => clearInterval(interval)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading])
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -99,7 +102,7 @@ export default function ScanPage() {
   async function processFile(file: File) {
     const ext = file.name.split('.').pop()?.toLowerCase()
     if (ext !== 'pdf' && file.type !== 'application/pdf') {
-      toast.error('Only PDF files are accepted. For best results, convert your document to PDF first.')
+      toast.error(t('scan.notPdf'))
       return
     }
     if (file.size > 25 * 1024 * 1024) {
@@ -214,7 +217,7 @@ export default function ScanPage() {
           <div className="absolute inset-0 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
         </div>
         <div className="text-center space-y-2">
-          <h2 className="text-xl font-semibold">Analyzing your contract...</h2>
+          <h2 className="text-xl font-semibold">{t('scan.analyzing')}</h2>
           <p className="text-muted-foreground animate-pulse">{loadingMessage}</p>
         </div>
       </div>
@@ -230,8 +233,8 @@ export default function ScanPage() {
             <Shield className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold">SignGuard</span>
           </Link>
-          <h1 className="text-3xl font-bold">Scan a Contract</h1>
-          <p className="text-muted-foreground">Upload, paste, or enter a URL to analyze any agreement</p>
+          <h1 className="text-3xl font-bold">{t('scan.title')}</h1>
+          <p className="text-muted-foreground">{t('scan.subtitle')}</p>
         </div>
 
         {isLoggedIn && (
@@ -263,9 +266,9 @@ export default function ScanPage() {
                   }`}
                 >
                   <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                  <p className="font-medium">Drop a PDF here, or click to upload</p>
+                  <p className="font-medium">{t('scan.dropzone')}</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    PDF files only — up to 25MB
+                    {t('scan.dropzoneFormats')}
                   </p>
                   <div className="flex justify-center mt-4">
                     <div className="flex flex-col items-center gap-1">
@@ -306,14 +309,14 @@ export default function ScanPage() {
 
             {/* Title input */}
             <Input
-              placeholder="Name this scan (optional)"
+              placeholder={t('scan.nameScan')}
               value={title}
               onChange={e => setTitle(e.target.value)}
             />
 
             {/* Contract type selector */}
             <div className="space-y-3">
-              <label className="text-sm font-medium">What type of contract is this? <span className="text-muted-foreground font-normal">(optional — AI detects automatically)</span></label>
+              <label className="text-sm font-medium">{t('scan.contractType')} <span className="text-muted-foreground font-normal">(optional — AI detects automatically)</span></label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {CONTRACT_TYPES.map(ct => {
                   const Icon = ct.icon
@@ -329,7 +332,7 @@ export default function ScanPage() {
                       }`}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{ct.label}</span>
+                      <span className="truncate">{t(ct.tKey)}</span>
                     </button>
                   )
                 })}
@@ -338,7 +341,7 @@ export default function ScanPage() {
 
             {/* Signer role selector */}
             <div className="space-y-3">
-              <label className="text-sm font-medium">Who are you signing as? <span className="text-muted-foreground font-normal">(optional)</span></label>
+              <label className="text-sm font-medium">{t('scan.signerRoleLabel')} <span className="text-muted-foreground font-normal">(optional)</span></label>
               <div className="grid grid-cols-1 gap-2">
                 {SIGNER_ROLES.map(sr => {
                   const isSelected = signerRole === sr.value
@@ -359,7 +362,7 @@ export default function ScanPage() {
                       >
                         {isSelected && <div className="h-2 w-2 rounded-full bg-primary" />}
                       </div>
-                      <span>{sr.label}</span>
+                      <span>{t(sr.tKey)}</span>
                     </button>
                   )
                 })}
@@ -368,14 +371,14 @@ export default function ScanPage() {
 
             {/* Consent section */}
             <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
-              <p className="text-sm font-medium">By scanning this document, you agree that:</p>
+              <p className="text-sm font-medium">{t('scan.consentTitle')}</p>
               <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
-                <li>Your document text will be sent to our AI provider (Anthropic) for analysis</li>
-                <li>The original file is deleted immediately after text extraction</li>
-                <li>Only the analysis results are stored — never your document content</li>
-                <li>You have the right to upload this document</li>
-                <li>This analysis is for informational purposes only and is not legal advice</li>
-                <li>AI analysis may contain errors — always verify important findings independently</li>
+                <li>{t('scan.consent1')}</li>
+                <li>{t('scan.consent2')}</li>
+                <li>{t('scan.consent3')}</li>
+                <li>{t('scan.consent4')}</li>
+                <li>{t('scan.consent5')}</li>
+                <li>{t('scan.consent6')}</li>
               </ul>
               <label className="flex items-center gap-3 cursor-pointer pt-1">
                 <input
@@ -384,7 +387,7 @@ export default function ScanPage() {
                   onChange={e => setConsent(e.target.checked)}
                   className="h-4 w-4 rounded border-border accent-primary"
                 />
-                <span className="text-sm font-medium">I understand and consent to these terms</span>
+                <span className="text-sm font-medium">{t('scan.consentCheckbox')}</span>
               </label>
             </div>
 
@@ -396,12 +399,12 @@ export default function ScanPage() {
               size="lg"
             >
               <Shield className="mr-2 h-5 w-5" />
-              Analyze Contract
+              {t('scan.analyzeButton')}
             </Button>
 
             {/* Disclaimer */}
             <p className="text-xs text-center text-muted-foreground">
-              SignGuard uses AI to highlight potential issues. Results are informational only and do not constitute legal advice.
+              {t('scan.disclaimer')}
             </p>
           </CardContent>
         </Card>

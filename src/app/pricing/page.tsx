@@ -1,16 +1,18 @@
+'use client'
+
 import Link from 'next/link'
 import { Check } from 'lucide-react'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = { title: 'Pricing — SignGuard' }
+import { useTranslation } from '@/lib/translations'
 
 export default function PricingPage() {
+  const { t } = useTranslation()
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-3">Simple, transparent pricing</h1>
+        <h1 className="text-4xl font-bold mb-3">{t('pricing.title')}</h1>
         <p className="text-lg text-muted-foreground">
-          Pay only when you need it. No subscriptions, no commitments.
+          {t('pricing.subtitle')}
         </p>
       </div>
 
@@ -86,7 +88,7 @@ export default function PricingPage() {
       </div>
 
       <p className="text-center text-muted-foreground mt-10">
-        Currently in beta &mdash; all features are free during the beta period.
+        {t('pricing.beta')}
       </p>
     </div>
   )

@@ -5,6 +5,12 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
+// On Netlify, NEXTAUTH_URL may not be set but URL is available
+if (!process.env.NEXTAUTH_URL && process.env.URL) {
+  process.env.NEXTAUTH_URL = process.env.URL
+}
+console.log('[AUTH] NEXTAUTH_URL:', process.env.NEXTAUTH_URL)
+
 const basePrismaAdapter = PrismaAdapter(prisma)
 const adapter = {
   ...basePrismaAdapter,
@@ -60,6 +66,10 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ account, profile }) {
+      console.log('[AUTH] signIn callback:', account?.provider, profile?.email)
+      return true
+    },
     async jwt({ token, user }) {
       if (user) token.id = user.id
       return token
@@ -67,6 +77,16 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) (session.user as { id: string }).id = token.id as string
       return session
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      console.log('[AUTH] User signed in:', user.email)
+    },
+  },
+  logger: {
+    error(code, metadata) {
+      console.error('[AUTH ERROR]', code, metadata)
     },
   },
 }
