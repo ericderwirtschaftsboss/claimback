@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { NavSidebar } from '@/components/nav-sidebar'
 import Link from 'next/link'
 import { Shield } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default async function ScanLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
@@ -19,7 +20,6 @@ export default async function ScanLayout({ children }: { children: React.ReactNo
     )
   }
 
-  // Guest layout — simple header, no sidebar, no auth redirect
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -28,7 +28,10 @@ export default async function ScanLayout({ children }: { children: React.ReactNo
             <Shield className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">SignGuard</span>
           </Link>
-          <Link href="/login" className="text-sm text-primary hover:underline">Sign in</Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/login" className="text-sm text-primary hover:underline">Sign in</Link>
+          </div>
         </div>
       </header>
       <div className="max-w-5xl mx-auto p-4 sm:p-6 md:p-8">{children}</div>

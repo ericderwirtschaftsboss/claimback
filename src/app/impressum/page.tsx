@@ -1,4 +1,3 @@
-// TODO: Replace [BRACKETED] placeholders with real information before going live
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
@@ -14,15 +13,15 @@ export default function ImpressumPage() {
       <section className="space-y-6 text-sm leading-relaxed">
         <div>
           <h2 className="text-xl font-semibold mb-2">Angaben gem&auml;&szlig; &sect; 5 TMG</h2>
-          <p>[VORNAME NACHNAME]<br />[STRASSE HAUSNUMMER]<br />[PLZ] [ORT]<br />Deutschland</p>
+          <p>Eric Garcia<br />Reichenbachstra&szlig;e 65D<br />01217 Dresden<br />Deutschland</p>
         </div>
         <div>
           <h2 className="text-lg font-semibold mb-2">Kontakt</h2>
-          <p>E-Mail: [EMAIL@BEISPIEL.DE]</p>
+          <p>Telefon: +49 174 209 1951<br />E-Mail: ericgkonto@gmail.com</p>
         </div>
         <div>
           <h2 className="text-lg font-semibold mb-2">Verantwortlich f&uuml;r den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
-          <p>[VORNAME NACHNAME]<br />[STRASSE HAUSNUMMER]<br />[PLZ] [ORT]</p>
+          <p>Eric Garcia<br />Reichenbachstra&szlig;e 65D<br />01217 Dresden</p>
         </div>
         <div>
           <h2 className="text-lg font-semibold mb-2">EU-Streitschlichtung</h2>
