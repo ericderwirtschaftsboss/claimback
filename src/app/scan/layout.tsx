@@ -1,15 +1,13 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { NavSidebar } from '@/components/nav-sidebar'
-import Link from 'next/link'
-import { Shield } from 'lucide-react'
-import { GuestHeaderActions } from './guest-header-actions'
 
 export default async function ScanLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
-  const isLoggedIn = !!session
 
-  if (isLoggedIn) {
+  // Always show sidebar — for logged-in users it has full nav,
+  // for guests the sidebar still shows with sign-in option
+  if (session) {
     return (
       <div className="min-h-screen">
         <NavSidebar />
@@ -20,18 +18,7 @@ export default async function ScanLayout({ children }: { children: React.ReactNo
     )
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">SignGuard</span>
-          </Link>
-          <GuestHeaderActions />
-        </div>
-      </header>
-      <div className="max-w-5xl mx-auto p-4 sm:p-6 md:p-8">{children}</div>
-    </div>
-  )
+  // Guest: no sidebar, just render content directly
+  // The scan page and result page handle their own headers when needed
+  return <>{children}</>
 }

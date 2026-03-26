@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Shield, FileSearch, Trash2, AlertTriangle, CheckCircle, XOctagon } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useTranslation } from '@/lib/translations'
 
 interface Scan {
   id: string
@@ -30,6 +31,7 @@ const riskLevelConfig: Record<string, { label: string; color: string; bg: string
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation()
   const [scans, setScans] = useState<Scan[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -55,15 +57,15 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">My Scans</h1>
+          <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
           <p className="text-muted-foreground">
-            {total > 0 ? `You've scanned ${total} contract${total !== 1 ? 's' : ''}` : 'No scans yet'}
+            {total > 0 ? `${total} ${t('dashboard.scannedCount')}` : t('dashboard.noScansYet')}
           </p>
         </div>
         <Button asChild size="lg">
           <Link href="/scan">
             <FileSearch className="h-5 w-5 mr-2" />
-            Scan a Contract
+            {t('dashboard.scanCta')}
           </Link>
         </Button>
       </div>
@@ -78,14 +80,14 @@ export default function DashboardPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Shield className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No contracts scanned yet</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('dashboard.noScansTitle')}</h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Upload a contract, paste terms of service, or enter a URL to get an instant AI-powered risk analysis.
+              {t('dashboard.noScansDesc')}
             </p>
             <Button asChild size="lg">
               <Link href="/scan">
                 <FileSearch className="h-5 w-5 mr-2" />
-                Scan your first contract
+                {t('dashboard.firstScanCta')}
               </Link>
             </Button>
           </CardContent>

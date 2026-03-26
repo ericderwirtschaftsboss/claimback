@@ -4,11 +4,10 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
-  Shield, Upload, FileText, File, X, Loader2, ArrowLeft,
+  Shield, Upload, FileText, X, Loader2, ArrowLeft,
   Briefcase, Home, Code, CreditCard, FileSearch,
   Dumbbell, Lock, ScrollText, Handshake
 } from 'lucide-react'
@@ -27,7 +26,7 @@ const CONTRACT_TYPES = [
   { label: 'Loan/Credit', value: 'LOAN', icon: CreditCard },
   { label: 'NDA', value: 'NDA', icon: Lock },
   { label: 'Terms of Service', value: 'TOS', icon: ScrollText },
-  { label: 'Other/Not Sure', value: 'OTHER', icon: File },
+  { label: 'Other/Not Sure', value: 'OTHER', icon: FileText },
 ] as const
 
 const SIGNER_ROLES = [
@@ -52,10 +51,7 @@ export default function ScanPage() {
   const { data: session } = useSession()
   const isLoggedIn = !!session
 
-  // Form state
-  const [activeTab, setActiveTab] = useState<'upload' | 'text'>('upload')
-  const [text, setText] = useState('')
-  // URL tab removed — PDF upload and paste text only
+  // Form state — PDF upload only
   const [title, setTitle] = useState('')
   const [contractType, setContractType] = useState('')
   const [signerRole, setSignerRole] = useState('')
@@ -142,10 +138,7 @@ export default function ScanPage() {
   }
 
   function hasContent(): boolean {
-    if (activeTab === 'upload') return !!extractedText
-    if (activeTab === 'text') return !!text.trim()
-    // URL tab removed
-    return false
+    return !!extractedText
   }
 
   const canSubmit = hasContent() && consent && !extracting
@@ -169,14 +162,9 @@ export default function ScanPage() {
         signerRole: signerRole || undefined,
       }
 
-      if (activeTab === 'upload') {
-        payload.text = extractedText
-        payload.fileName = uploadedFile?.name
-        payload.sourceType = 'FILE'
-      } else {
-        payload.text = text
-        payload.sourceType = 'TEXT'
-      }
+      payload.text = extractedText
+      payload.fileName = uploadedFile?.name
+      payload.sourceType = 'FILE'
 
       // Step 1: Create scan record (returns immediately)
       const res = await fetch('/api/scan', {
@@ -258,26 +246,9 @@ export default function ScanPage() {
 
         {/* Single card with all inputs */}
         <Card>
-          <CardHeader className="pb-3">
-            <div className="flex gap-2">
-              {(['upload', 'text'] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
-                    activeTab === tab
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {tab === 'upload' ? 'Upload PDF' : 'Paste Text'}
-                </button>
-              ))}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Upload tab */}
-            {activeTab === 'upload' && (
+          <CardContent className="space-y-6 pt-6">
+            {/* PDF Upload */}
+            {(
               !uploadedFile ? (
                 <div
                   onDragEnter={handleDrag}
@@ -331,17 +302,7 @@ export default function ScanPage() {
               )
             )}
 
-            {/* Paste tab */}
-            {activeTab === 'text' && (
-              <Textarea
-                placeholder="Paste the contract, terms of service, or agreement text..."
-                className="min-h-[200px] resize-y"
-                value={text}
-                onChange={e => setText(e.target.value)}
-              />
-            )}
-
-            {/* URL tab removed — PDF upload and paste text only */}
+            {/* PDF upload only — no text paste or URL */}
 
             {/* Title input */}
             <Input
