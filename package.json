@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/set-db-provider.js && npx prisma generate && npx prisma migrate deploy && next build",
+    "build": "node scripts/set-db-provider.js && npx prisma generate && npx prisma migrate deploy && mkdir -p public && cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs && next build",
     "build:local": "next build",
     "start": "next start",
     "lint": "next lint",
