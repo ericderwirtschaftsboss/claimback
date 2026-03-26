@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { generatePdfReport } from '@/lib/pdf-report'
 import { format } from 'date-fns'
@@ -294,6 +295,8 @@ export function ScanResultClient({
   missingProtections,
   externalReferences = [],
 }: ScanResultClientProps) {
+  const { data: session } = useSession()
+  const isLoggedIn = !!session
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'CRITICAL' | 'WARNING' | 'INFO'>('ALL')
   const [highConfidenceOnly, setHighConfidenceOnly] = useState(false)
   const [expandedFlagId, setExpandedFlagId] = useState<number | null>(null)
@@ -549,9 +552,9 @@ export function ScanResultClient({
       {/* ---------------------------------------------------------------- */}
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
-          <Link href="/dashboard">
+          <Link href={isLoggedIn ? '/dashboard' : '/scan'}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
+            {isLoggedIn ? 'Back to My Scans' : 'Scan another contract'}
           </Link>
         </Button>
       </div>
