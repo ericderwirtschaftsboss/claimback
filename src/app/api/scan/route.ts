@@ -166,22 +166,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Request too large or malformed. Try a smaller file or paste text directly.' }, { status: 400 })
     }
 
-    const { text, url, title, documentBase64, documentMediaType, fileName, sourceType: inputSourceType, contractType, signerRole } = body
-
-    console.log('[SCAN] Request received:', {
-      hasText: !!text,
-      textLen: text?.length || 0,
-      hasDoc: !!documentBase64,
-      docLen: documentBase64?.length || 0,
-      docType: documentMediaType,
-      fileName,
-      sourceType: inputSourceType,
-    })
+    const { text, url, title, fileName, sourceType: inputSourceType, contractType, signerRole } = body
 
     let contractText = text || ''
     let sourceType = inputSourceType || 'TEXT'
 
-    if (url && !text && !documentBase64) {
+    console.log('[SCAN] Request received:', {
+      textLen: contractText.length,
+      fileName,
+      sourceType,
+    })
+
+    // URL text extraction (server-side)
+    if (url && !contractText) {
       sourceType = 'URL'
       try {
         const res = await fetch(url)
@@ -194,16 +191,15 @@ export async function POST(request: Request) {
           .trim()
           .slice(0, 50000)
       } catch {
-        return NextResponse.json({ error: 'Failed to fetch content from the URL. Check the address and try again.' }, { status: 400 })
+        return NextResponse.json({ error: 'Failed to fetch content from the URL.' }, { status: 400 })
       }
     }
 
-    if (!contractText && !documentBase64) {
+    if (!contractText) {
       return NextResponse.json({ error: 'No content to analyze. Please upload a file, paste text, or enter a URL.' }, { status: 400 })
     }
 
-    // Check minimum content length for text-based input
-    if (contractText && contractText.split(/\s+/).length < 50) {
+    if (contractText.split(/\s+/).length < 50) {
       return NextResponse.json({ error: 'The document appears too short for meaningful analysis. Try uploading the complete contract or pasting more text.' }, { status: 400 })
     }
 
@@ -211,21 +207,11 @@ export async function POST(request: Request) {
     const analysisInstruction = 'Analyze this contract thoroughly. Detect language and jurisdiction. Flag EVERY problematic clause individually. Return the FULL analysis in the contract\'s language as JSON per the system prompt.'
     const messages: any[] = []
 
-    if (documentBase64 && documentMediaType) {
-      const contentType = documentMediaType === 'application/pdf' ? 'document' : 'image'
-      messages.push({
-        role: 'user',
-        content: [
-          { type: contentType, source: { type: 'base64', media_type: documentMediaType, data: documentBase64 } },
-          { type: 'text', text: analysisInstruction },
-        ],
-      })
-    } else {
-      messages.push({ role: 'user', content: `${analysisInstruction}\n\n${contractText.slice(0, 50000)}` })
-    }
+    // All content sent as text — PDF/DOCX text extracted client-side
+    messages.push({ role: 'user', content: `${analysisInstruction}\n\n${contractText.slice(0, 50000)}` })
 
     // Call Claude API
-    console.log('[SCAN] Calling Claude API...', { hasDocBase64: !!documentBase64, textLength: contractText?.length || 0 })
+    console.log('[SCAN] Calling Claude API...', { textLength: contractText.length })
 
     let result: any
     let lastError: any = null

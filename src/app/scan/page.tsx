@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { extractTextFromFile } from '@/lib/extract-text'
 
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.svg', '.heic']
 
@@ -64,8 +65,6 @@ export default function ScanPage() {
   // File upload state
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [extractedText, setExtractedText] = useState('')
-  const [documentBase64, setDocumentBase64] = useState<string | null>(null)
-  const [documentMediaType, setDocumentMediaType] = useState<string | null>(null)
   const [fileType, setFileType] = useState('')
   const [extracting, setExtracting] = useState(false)
   const [dragActive, setDragActive] = useState(false)
@@ -118,28 +117,21 @@ export default function ScanPage() {
 
     setUploadedFile(file)
     setExtractedText('')
-    setDocumentBase64(null)
-    setDocumentMediaType(null)
     setExtracting(true)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      const res = await fetch('/api/scan/upload', { method: 'POST', body: formData })
-      const data = await res.json()
-      if (!res.ok) {
-        toast.error(data.error)
+      // Extract text client-side — avoids Netlify's 6MB body size limit
+      const result = await extractTextFromFile(file)
+      setFileType(result.fileType)
+      setExtractedText(result.text)
+
+      if (!result.text.trim()) {
+        toast.error('Could not extract text from this file. Try pasting the text directly.')
         setUploadedFile(null)
         return
       }
-      setFileType(data.fileType)
-      if (data.documentBase64) {
-        setDocumentBase64(data.documentBase64)
-        setDocumentMediaType(data.documentMediaType)
-      }
-      if (data.text) setExtractedText(data.text)
-    } catch {
-      toast.error('Failed to process file')
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to process file')
       setUploadedFile(null)
     } finally {
       setExtracting(false)
@@ -149,14 +141,12 @@ export default function ScanPage() {
   function clearFile() {
     setUploadedFile(null)
     setExtractedText('')
-    setDocumentBase64(null)
-    setDocumentMediaType(null)
     setFileType('')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   function hasContent(): boolean {
-    if (activeTab === 'upload') return !!(extractedText || documentBase64)
+    if (activeTab === 'upload') return !!extractedText
     if (activeTab === 'text') return !!text.trim()
     if (activeTab === 'url') return !!url.trim()
     return false
@@ -185,12 +175,7 @@ export default function ScanPage() {
       }
 
       if (activeTab === 'upload') {
-        if (documentBase64) {
-          payload.documentBase64 = documentBase64
-          payload.documentMediaType = documentMediaType
-        } else {
-          payload.text = extractedText
-        }
+        payload.text = extractedText
         payload.fileName = uploadedFile?.name
         payload.sourceType = 'FILE'
       } else if (activeTab === 'text') {
